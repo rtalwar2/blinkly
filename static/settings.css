@@ -1,0 +1,136 @@
+:root {
+  --background: hsl(210, 25%, 98%);
+  --foreground: hsl(220, 30%, 18%);
+
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(220, 30%, 18%);
+
+  --primary: hsl(180, 65%, 45%);
+  --primary-foreground: hsl(0, 0%, 100%);
+
+  --secondary: hsl(220, 45%, 35%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+
+  --muted: hsl(210, 20%, 94%);
+  --muted-foreground: hsl(220, 15%, 50%);
+
+  --accent: hsl(160, 55%, 55%);
+  --accent-foreground: hsl(220, 30%, 18%);
+
+  --border: hsl(210, 20%, 90%);
+  --input: hsl(210, 20%, 96%);
+  --ring: hsl(180, 65%, 45%);
+
+  --radius: 1rem;
+  --shadow-soft: 0 4px 20px -4px hsla(180, 65%, 45%, 0.15);
+  --shadow-card: 0 2px 12px -2px hsla(220, 30%, 18%, 0.08);
+}
+
+/* ---- Base layout ---- */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  padding: 2rem;
+}
+
+/* ---- Card container (uses Bootstrap card base) ---- */
+.card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+  max-width: 500px;
+  margin: 2rem auto;
+  transition: box-shadow 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-soft);
+}
+.card-header {
+  background: var(--gradient-hero, linear-gradient(135deg, hsl(180, 65%, 45%) 0%, hsl(160, 55%, 55%) 100%));
+  color: var(--primary-foreground);
+  text-align: center;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+  padding: 1rem;
+  /* box-shadow: inset 0 -1px 0 hsla(0, 0%, 100%, 0.1); */
+    font-size: 1.8rem;
+      font-weight: 700;
+  background: var(--gradient-hero, linear-gradient(135deg, hsl(180,65%,45%) 0%, hsl(160,55%,55%) 100%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+    text-align: center;
+  /* margin-bottom: 2rem; */
+  /* border-bottom: 0; */
+}
+
+
+/* ---- Form controls ---- */
+.form-label {
+  font-weight: 500;
+  color: var(--foreground);
+  margin-top: 1rem;
+}
+
+.form-control {
+  background-color: var(--input);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: calc(var(--radius) / 2);
+  transition: box-shadow 0.2s ease, border 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 0.2rem hsla(180, 65%, 45%, 0.25);
+}
+
+/* ---- Color picker ---- */
+input[type="color"].form-control {
+  padding: 0.1rem;
+  width: 60px;
+  height: 38px;
+  cursor: pointer;
+}
+
+/* ---- Checkbox ---- */
+.form-check-input {
+  accent-color: hsl(180, 65%, 45%);
+  transform: scale(1.1);
+  margin-top: 0.3rem;
+}
+
+.form-check-input:checked  {
+  background-color: hsl(180, 65%, 45%);
+  border-color: (180, 65%, 45%);
+}
+
+/* ---- Save button ---- */
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ---- Success message ---- */
+.msg {
+  margin-top: 1rem;
+  color: hsl(160, 55%, 45%);
+  text-align: center;
+  font-weight: 500;
+  display: none;
+}
