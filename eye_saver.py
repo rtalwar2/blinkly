@@ -155,7 +155,7 @@ def run_overlay_loop(icon):
             icon.icon = create_eye_icon(0)
             icon.title = "Break time!"
             show_black_screen(duration)
-            playsound(str(sound_file))
+            # playsound(str(sound_file))
         else:
             icon.icon = create_eye_icon(0)
             icon.title = f"Blinkly paused"
