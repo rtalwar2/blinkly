@@ -3,7 +3,7 @@ async function loadSettings() {
     const data = await res.json();
     document.getElementById('interval').value = data.break_interval;
     document.getElementById('duration').value = data.break_duration;
-    document.getElementById('pause_blinkly').value=data.pause_blinkly;
+    document.getElementById('pause_blinkly').checked=data.pause_blinkly;
 }
 
 document.getElementById('settings-form').addEventListener('submit', async (e) => {

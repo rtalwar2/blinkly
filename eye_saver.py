@@ -6,7 +6,9 @@ import pystray
 from PIL import Image, ImageDraw,ImageFont
 from playsound import playsound
 import json, os, webbrowser
+import sys
 from pathlib import Path
+import traceback
 
 # ===== FastAPI imports =====
 from fastapi import FastAPI, Form
@@ -19,7 +21,16 @@ from pydantic import BaseModel, Field
 # CONFIGURATION & MODEL
 # ============================================================
 
-SETTINGS_FILE = Path("eye_break_settings.json")
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and PyInstaller."""
+    try:
+        base_path = Path(sys._MEIPASS)
+    except Exception:
+        base_path = Path(__file__).parent
+    return base_path / relative_path
+SETTINGS_FILE = resource_path("eye_break_settings.json")
+STATIC_DIR = resource_path("static")
+sound_file = resource_path("./assets/pan2.mp3")
 
 class SettingsModel(BaseModel):
     break_interval: int = Field(20, description="Minutes between breaks", ge=1, le=180)
@@ -81,12 +92,19 @@ def save_settings_api(
     return {"status": "ok", "message": "Settings saved successfully"}
 
 # serve static files (your HTML frontend)
-STATIC_DIR = Path("./static")
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="settings")
 
 
+
 def start_web_ui():
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error")
+    """Run FastAPI server in a background thread (with silent error handling)."""
+    try:
+        uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error",log_config=None)
+    except Exception as e:
+        # Log to a file for debugging (works in --windowed mode)
+        with open("blinkly_error.log", "w", encoding="utf-8") as f:
+            f.write("⚠️ FastAPI startup failed:\n")
+            f.write(traceback.format_exc())
 
 # ============================================================
 # EYE BREAK CORE
@@ -137,11 +155,10 @@ def run_overlay_loop(icon):
             icon.icon = create_eye_icon(0)
             icon.title = "Break time!"
             show_black_screen(duration)
-            playsound("pan2.mp3")
+            playsound(str(sound_file))
         else:
             icon.icon = create_eye_icon(0)
             icon.title = f"Blinkly paused"
-
             time.sleep(5)
 
 
