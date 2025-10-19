@@ -1,0 +1,4 @@
+screeninfo
+pystray
+playsound==1.2.2
+fastapi[standard]
