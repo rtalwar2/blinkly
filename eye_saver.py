@@ -3,7 +3,7 @@ import threading
 import tkinter as tk
 from screeninfo import get_monitors
 import pystray
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw,ImageFont
 from playsound import playsound
 import json, os, webbrowser
 from pathlib import Path
@@ -94,23 +94,18 @@ def start_web_ui():
 
 def create_eye_icon(minutes_left):
     width, height = 64, 64
-
+    img = Image.new("RGB", (width, height), "black")
+    draw = ImageDraw.Draw(img)
     if settings_manager.current.pause_blinkly:
-        pass
+        draw.ellipse([8, 16, 56, 48], outline="white", width=4)
+        draw.ellipse([26, 26, 38, 38], fill="white")
+        draw.line([0, 0, width, height], fill="white", width=4)
     else:
-        img = Image.new("RGB", (width, height), "black")
-        draw = ImageDraw.Draw(img)
-
-        if minutes_left > 12:
-            draw.ellipse([8, 16, 56, 48], outline="white", width=4)
-            draw.ellipse([26, 26, 38, 38], fill="white")
-        elif minutes_left > 7:
-            draw.ellipse([8, 24, 56, 48], outline="white", width=4)
-            draw.ellipse([26, 30, 38, 42], fill="white")
-        else:
-            draw.ellipse([8, 28, 56, 44], outline="white", width=4)
-            draw.ellipse([26, 32, 38, 44], fill="white")
-        return img
+        font_size = 64-8
+        font=ImageFont.load_default(font_size)
+        text=str(minutes_left)
+        draw.text((-2,(64-font_size)/2-6),text,fill="white",font=font)
+    return img
 
 
 def show_black_screen(duration):
@@ -145,6 +140,8 @@ def run_overlay_loop(icon):
             playsound("pan2.mp3")
         else:
             icon.icon = create_eye_icon(0)
+            icon.title = f"Blinkly paused"
+
             time.sleep(5)
 
 
