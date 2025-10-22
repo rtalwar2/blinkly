@@ -2,11 +2,11 @@ import os
 import sys
 import platform
 from pathlib import Path
-
+import tkinter as tk
+from tkinter import messagebox
 # Optional: only needed on Windows for the message box + shortcut
 if platform.system() == "Windows":
-    import tkinter as tk
-    from tkinter import messagebox
+
     from win32com.client import Dispatch  # pip install pywin32
 
 
@@ -71,6 +71,18 @@ def _ensure_autostart_linux(app_name, delay_seconds):
     if desktop_file.exists():
         return  # already installed
 
+
+    else:
+        root = tk.Tk()
+        root.withdraw()
+        result = messagebox.askyesno(
+            f"{app_name} Autostart",
+            f"Would you like {app_name} to start automatically?"
+        )
+        root.destroy()
+        if not result:
+            return
+        
     exec_path = f"sh -c 'sleep {delay_seconds} && {sys.executable}'"
     content = f"""[Desktop Entry]
 Type=Application

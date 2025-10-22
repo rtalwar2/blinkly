@@ -18,7 +18,7 @@ import uvicorn
 from pydantic import BaseModel, Field
 
 import helpers.autostart as autostart
-
+from appdirs import user_config_dir
 # ============================================================
 # CONFIGURATION & MODEL
 # ============================================================
@@ -30,7 +30,12 @@ def resource_path(relative_path):
     except Exception:
         base_path = Path(__file__).parent
     return base_path / relative_path
-SETTINGS_FILE = resource_path("eye_break_settings.json")
+
+APP_NAME = "Blinkly"
+CONFIG_DIR = Path(user_config_dir(APP_NAME))
+CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+SETTINGS_FILE = CONFIG_DIR / "blinkly_settings.json"
+
 STATIC_DIR = resource_path("static")
 sound_file = resource_path("./assets/pan2.mp3")
 
