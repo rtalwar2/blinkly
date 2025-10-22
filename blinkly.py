@@ -129,9 +129,16 @@ def create_eye_icon(minutes_left):
         draw.line([0, 0, width, height], fill="white", width=4)
     else:
         font_size = 64-8
+        if minutes_left/100>1:
+            font_size=38
         font=ImageFont.load_default(font_size)
         text=str(minutes_left)
-        draw.text((-2,(64-font_size)/2-6),text,fill="white",font=font)
+        if len(text)==3:
+            draw.text((-2,(64-font_size)/2 -6), text, fill="white", font=font)
+        elif len(text)==2:
+            draw.text((-2,(64-font_size)/2 -6), text, fill="white", font=font)
+        elif len(text)==1:
+            draw.text((16,(64-font_size)/2 -6), text, fill="white", font=font)
     return img
 
 
