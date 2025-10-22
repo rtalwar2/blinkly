@@ -17,6 +17,8 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 from pydantic import BaseModel, Field
 
+import helpers.autostart as autostart
+
 # ============================================================
 # CONFIGURATION & MODEL
 # ============================================================
@@ -127,17 +129,21 @@ def create_eye_icon(minutes_left):
 
 
 def show_black_screen(duration):
+    """Show a full black overlay for `duration` seconds across all screens."""
     monitors = get_monitors()
     windows = []
-    for m in monitors:
+
+    for monitor in monitors:
         root = tk.Tk()
         root.configure(bg="black")
         root.attributes("-topmost", True)
         root.attributes("-fullscreen", True)
+        root.geometry(f"{monitor.width}x{monitor.height}+{monitor.x}+{monitor.y}")
         root.after(duration * 1000, root.destroy)
         windows.append(root)
-    for w in windows:
-        w.mainloop()
+
+    for root in windows:
+        root.mainloop()
 
 
 def run_overlay_loop(icon):
@@ -188,4 +194,5 @@ def start_tray_icon():
 
 
 if __name__ == "__main__":
+    autostart.ensure_autostart(app_name="Blinkly")
     start_tray_icon()

@@ -1,1 +1,4 @@
 pyinstaller --noconfirm --onefile --windowed --add-data "static;static" --add-data "assets;assets"  eye_saver.py
+
+
+pyinstaller --noconfirm --onefile --windowed --add-data "static:static" --add-data "helpers:helpers" --add-data "assets:assets"  blinkly.py

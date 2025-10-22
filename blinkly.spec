@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['eye_saver.py'],
+    ['blinkly.py'],
     pathex=[],
     binaries=[],
-    datas=[('static', 'static'), ('assets', 'assets')],
+    datas=[('static', 'static'), ('helpers', 'helpers'), ('assets', 'assets')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='eye_saver',
+    name='blinkly',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
