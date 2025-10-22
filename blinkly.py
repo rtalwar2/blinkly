@@ -9,6 +9,7 @@ import json, os, webbrowser
 import sys
 from pathlib import Path
 import traceback
+import platform
 
 # ===== FastAPI imports =====
 from fastapi import FastAPI, Form
@@ -121,7 +122,11 @@ def start_web_ui():
 
 def create_eye_icon(minutes_left):
     width, height = 64, 64
-    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    img = Image.new("RGB", (width, height), "black")
+
+    if platform.system() == "Windows":
+        img = Image.new("RGBA", (width, height), (0,0,0,0))
+
     draw = ImageDraw.Draw(img)
     if settings_manager.current.pause_blinkly:
         draw.ellipse([8, 16, 56, 48], outline="white", width=4)
