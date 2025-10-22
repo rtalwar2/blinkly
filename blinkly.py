@@ -115,6 +115,24 @@ def start_web_ui():
         with open("blinkly_error.log", "w", encoding="utf-8") as f:
             f.write("⚠️ FastAPI startup failed:\n")
             f.write(traceback.format_exc())
+import socket
+
+def open_settings_page_when_ready(url="http://127.0.0.1:8000/", timeout=20):
+    """Wait until FastAPI server is reachable, then open the settings page."""
+    def _wait_and_open():
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                # Try connecting to port 8000
+                with socket.create_connection(("127.0.0.1", 8000), timeout=1):
+                    webbrowser.open(url)
+                    return
+            except (OSError, ConnectionRefusedError):
+                time.sleep(0.5)
+        # If it never came up, still try to open (browser will show error)
+        webbrowser.open(url)
+
+    threading.Thread(target=_wait_and_open, daemon=True).start()
 
 # ============================================================
 # EYE BREAK CORE
@@ -214,4 +232,5 @@ def start_tray_icon():
 
 if __name__ == "__main__":
     autostart.ensure_autostart(app_name="Blinkly")
+    open_settings_page_when_ready()
     start_tray_icon()
