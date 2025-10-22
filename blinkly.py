@@ -107,6 +107,8 @@ def start_web_ui():
     """Run FastAPI server in a background thread (with silent error handling)."""
     try:
         uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error",log_config=None)
+        webbrowser.open("http://127.0.0.1:8000/")
+
     except Exception as e:
         # Log to a file for debugging (works in --windowed mode)
         with open("blinkly_error.log", "w", encoding="utf-8") as f:
@@ -119,7 +121,7 @@ def start_web_ui():
 
 def create_eye_icon(minutes_left):
     width, height = 64, 64
-    img = Image.new("RGB", (width, height), "black")
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     if settings_manager.current.pause_blinkly:
         draw.ellipse([8, 16, 56, 48], outline="white", width=4)
