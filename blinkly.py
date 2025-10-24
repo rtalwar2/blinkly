@@ -170,18 +170,28 @@ def show_black_screen(duration):
     monitors = get_monitors()
     windows = []
 
+    def fade_in(window):
+        steps=50
+        fade_time=1
+        for i in range(steps + 1):
+            alpha = i / steps
+            window.attributes("-alpha", alpha)
+            window.update()
+            time.sleep(fade_time / steps)
+
     for monitor in monitors:
         root = tk.Tk()
         root.configure(bg="black")
         root.attributes("-topmost", True)
+        root.attributes("-alpha", 0.0)
         root.attributes("-fullscreen", True)
         root.geometry(f"{monitor.width}x{monitor.height}+{monitor.x}+{monitor.y}")
         root.after(duration * 1000, root.destroy)
+        root.after(10, fade_in,root)
         windows.append(root)
 
     for root in windows:
         root.mainloop()
-
 
 def run_overlay_loop(icon):
     while True:
