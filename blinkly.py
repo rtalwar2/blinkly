@@ -18,9 +18,11 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 from pydantic import BaseModel, Field
 
+from helpers import desktop_shortcut
 import helpers.autostart as autostart
 from appdirs import user_config_dir
-
+import shutil
+import subprocess
 # ============================================================
 # CONFIGURATION & MODEL
 # ============================================================
@@ -42,6 +44,7 @@ SETTINGS_FILE = CONFIG_DIR / "blinkly_settings.json"
 
 STATIC_DIR = resource_path("static")
 sound_file = resource_path("./assets/pan2.mp3")
+ASSETS_DIR = resource_path("assets")
 
 
 class SettingsModel(BaseModel):
@@ -138,12 +141,12 @@ def open_settings_page_when_ready(url="http://127.0.0.1:8000/", timeout=20):
             try:
                 # Try connecting to port 8000
                 with socket.create_connection(("127.0.0.1", 8000), timeout=1):
-                    webbrowser.open(url)
+                    open_settings_app_mode()
                     return
             except (OSError, ConnectionRefusedError):
                 time.sleep(0.5)
         # If it never came up, still try to open (browser will show error)
-        webbrowser.open(url)
+        open_settings_app_mode()
 
     threading.Thread(target=_wait_and_open, daemon=True).start()
 
@@ -243,9 +246,49 @@ def on_exit(icon, item):
     icon.stop()
 
 
-def on_open_settings(icon, item):
-    webbrowser.open("http://127.0.0.1:8000/")
+def open_settings_app_mode():
+    url = "http://127.0.0.1:8000/"
+    system = platform.system()
 
+    if system == "Windows":
+        # Try Chrome first
+        chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+        edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+        firefox_path = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+
+        if shutil.which(chrome_path):
+            subprocess.Popen([chrome_path, f"--app={url}", "--window-size=900,700"])
+        elif shutil.which(edge_path):
+            subprocess.Popen([edge_path, f"--app={url}", "--window-size=900,700"])
+        elif shutil.which(firefox_path):
+            subprocess.Popen([firefox_path, f"--kiosk", url])
+        else:
+            subprocess.Popen(["start", url], shell=True)
+
+    elif system == "Linux":
+        if shutil.which("google-chrome"):
+            subprocess.Popen(["google-chrome", f"--app={url}", "--window-size=900,700"])
+        elif shutil.which("chromium-browser"):
+            subprocess.Popen(["chromium-browser", f"--app={url}", "--window-size=900,700"])
+        elif shutil.which("firefox"):
+            subprocess.Popen(["firefox", "--kiosk", url])
+        else:
+            subprocess.Popen(["xdg-open", url])
+
+    elif system == "Darwin":
+        chrome_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+        firefox_path = "/Applications/Firefox.app/Contents/MacOS/firefox"
+        if Path(chrome_path).exists():
+            subprocess.Popen([chrome_path, f"--app={url}", "--window-size=900,700"])
+        elif Path(firefox_path).exists():
+            subprocess.Popen([firefox_path, "--kiosk", url])
+        else:
+            subprocess.Popen(["open", url])
+
+
+def on_open_settings(icon, item):
+    # webbrowser.open("http://127.0.0.1:8000/")
+    open_settings_app_mode()
 
 def start_tray_icon():
     initial_icon = create_eye_icon(settings.break_interval)
@@ -266,6 +309,7 @@ def start_tray_icon():
 
 
 if __name__ == "__main__":
-    autostart.ensure_autostart(app_name="Blinkly")
+    if autostart.ensure_autostart(app_name="Blinkly"):
+        desktop_shortcut.create_shortcut(assets_dir=ASSETS_DIR)
     open_settings_page_when_ready()
     start_tray_icon()

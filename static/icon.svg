@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Rounded rectangle background with gradient -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="hsl(180, 65%, 45%)"/>
+      <stop offset="100%" stop-color="hsl(180, 65%, 55%)"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="80" height="80" rx="20" ry="20" fill="url(#grad)" />
+  <!-- Eye icon -->
+  <g stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="translate(17,17) scale(2)">
+   <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3" />
+  </g>
+</svg>
+

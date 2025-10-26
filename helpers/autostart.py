@@ -9,7 +9,7 @@ if platform.system() == "Windows":
     from win32com.client import Dispatch  # pip install pywin32
 
 
-def ensure_autostart(app_name="Eye Saver", ask_user=True, delay_seconds=10):
+def ensure_autostart(app_name="Blinkly", ask_user=True, delay_seconds=10):
     """
     Ensures the app autostarts on login.
     Works on both Windows and Linux.
@@ -21,9 +21,9 @@ def ensure_autostart(app_name="Eye Saver", ask_user=True, delay_seconds=10):
     system = platform.system()
 
     if system == "Windows":
-        _ensure_autostart_windows(app_name, ask_user)
+        return _ensure_autostart_windows(app_name, ask_user)
     elif system == "Linux":
-        _ensure_autostart_linux(app_name, delay_seconds)
+        return _ensure_autostart_linux(app_name, delay_seconds)
     else:
         print(f"[autostart] Unsupported platform: {system}")
 
@@ -35,7 +35,7 @@ def _ensure_autostart_windows(app_name, ask_user):
     shortcut_path = os.path.join(startup, f"{app_name}.lnk")
 
     if os.path.exists(shortcut_path):
-        return  # already installed
+        return False # already installed
 
     if ask_user:
         root = tk.Tk()
@@ -46,7 +46,7 @@ def _ensure_autostart_windows(app_name, ask_user):
         )
         root.destroy()
         if not result:
-            return
+            return result
 
     target = sys.executable
     script = os.path.abspath(sys.argv[0])
@@ -60,7 +60,7 @@ def _ensure_autostart_windows(app_name, ask_user):
     shortcut.Save()
 
     print(f"[autostart] Created Windows Startup shortcut: {shortcut_path}")
-
+    return result
 
 def _ensure_autostart_linux(app_name, delay_seconds):
     autostart_dir = Path.home() / ".config" / "autostart"
@@ -68,7 +68,7 @@ def _ensure_autostart_linux(app_name, delay_seconds):
     desktop_file = autostart_dir / f"{app_name.lower().replace(' ', '_')}.desktop"
 
     if desktop_file.exists():
-        return  # already installed
+        return False # already installed
 
 
     else:
@@ -80,7 +80,7 @@ def _ensure_autostart_linux(app_name, delay_seconds):
         )
         root.destroy()
         if not result:
-            return
+            return False
         
     exec_path = f"sh -c 'sleep {delay_seconds} && {sys.executable}'"
     content = f"""[Desktop Entry]
@@ -95,3 +95,4 @@ Comment=Starts {app_name} automatically on login
 
     desktop_file.write_text(content)
     print(f"[autostart] Created Linux autostart entry: {desktop_file}")
+    return result
