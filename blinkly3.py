@@ -4,27 +4,20 @@ import tkinter as tk
 from screeninfo import get_monitors
 import pystray
 from PIL import Image, ImageDraw, ImageFont
-from playsound import playsound
-import json, os, webbrowser
-import sys
+import json, sys, platform, subprocess
 from pathlib import Path
-import traceback
-import platform
-
-# ===== FastAPI imports =====
 from fastapi import FastAPI, Form
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 from pydantic import BaseModel, Field
-
-import helpers.autostart as autostart
 from appdirs import user_config_dir
-import webview
-# ============================================================
-# CONFIGURATION & MODEL
-# ============================================================
+import helpers.autostart as autostart
+import webbrowser
 
+# ============================================================
+# CONFIGURATION
+# ============================================================
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and PyInstaller."""
@@ -34,14 +27,16 @@ def resource_path(relative_path):
         base_path = Path(__file__).parent
     return base_path / relative_path
 
-
 APP_NAME = "Blinkly"
 CONFIG_DIR = Path(user_config_dir(APP_NAME))
 CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 SETTINGS_FILE = CONFIG_DIR / "blinkly_settings.json"
-
 STATIC_DIR = resource_path("static")
-sound_file = resource_path("./assets/pan2.mp3")
+sound_file = resource_path("assets/pan2.mp3")
+
+# ============================================================
+# SETTINGS MODEL
+# ============================================================
 
 
 class SettingsModel(BaseModel):
@@ -74,12 +69,11 @@ class SettingsManager:
     def current(self) -> SettingsModel:
         return self._data
 
-
 settings_manager = SettingsManager(SETTINGS_FILE, SettingsModel())
 settings = settings_manager.load()
 
 # ============================================================
-# FASTAPI SETTINGS PANEL
+# FASTAPI BACKEND
 # ============================================================
 
 app = FastAPI()
@@ -106,65 +100,19 @@ def save_settings_api(
     settings_manager.save(model)
     return {"status": "ok", "message": "Settings saved successfully"}
 
-
 # serve static files (your HTML frontend)
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="settings")
 
-
-def start_web_ui():
-    """Run FastAPI in background thread, and open pywebview window."""
-    def run_server():
-        uvicorn.run(
-            app, host="127.0.0.1", port=8000, log_level="error", log_config=None
-        )
-
-    # Start the FastAPI server in a background thread
-    threading.Thread(target=run_server, daemon=True).start()
-
-    # Wait briefly to ensure server starts before webview opens
-    time.sleep(1)
-
-    # Create and show the webview window
-    webview.create_window(
-        title="Blinkly Settings",
-        url="http://127.0.0.1:8000/",
-        width=600,
-        height=500,
-        resizable=True,
-        confirm_close=True,
-    )
-
-    # Start the event loop (blocking)
-    webview.start()
-
-
-
-# import socket
-
-
-# def open_settings_page_when_ready(url="http://127.0.0.1:8000/", timeout=20):
-#     """Wait until FastAPI server is reachable, then open the settings page."""
-
-#     def _wait_and_open():
-#         start_time = time.time()
-#         while time.time() - start_time < timeout:
-#             try:
-#                 # Try connecting to port 8000
-#                 with socket.create_connection(("127.0.0.1", 8000), timeout=1):
-#                     webbrowser.open(url)
-#                     return
-#             except (OSError, ConnectionRefusedError):
-#                 time.sleep(0.5)
-#         # If it never came up, still try to open (browser will show error)
-#         webbrowser.open(url)
-
-#     threading.Thread(target=_wait_and_open, daemon=True).start()
-
+def start_backend():
+    """Run FastAPI (Uvicorn) in background thread."""
+    def run():
+        uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error", log_config=None)
+    t = threading.Thread(target=run, daemon=True)
+    t.start()
 
 # ============================================================
 # EYE BREAK CORE
 # ============================================================
-
 
 def create_eye_icon(minutes_left):
     width, height = 64, 64
@@ -227,7 +175,6 @@ def show_black_screen(duration):
     for root in windows:
         root.mainloop()
 
-
 def run_overlay_loop(icon):
     while True:
         starttime = time.time()
@@ -251,37 +198,40 @@ def run_overlay_loop(icon):
             icon.title = f"Blinkly paused"
             time.sleep(5)
 
+# ============================================================
+# TRAY + SETTINGS LAUNCHER
+# ============================================================
 
 def on_exit(icon, item):
     icon.stop()
 
-
 def on_open_settings(icon, item):
-    # webbrowser.open("http://127.0.0.1:8000/")
-    threading.Thread(target=start_web_ui, daemon=True).start()
+    """Spawn new process to open settings window."""
+    script = resource_path("open_settings.py")
+    try:
+        if platform.system() == "Windows":
+            subprocess.Popen([sys.executable, str(script)], creationflags=0x00000008)
+        else:
+            subprocess.Popen([sys.executable, str(script)])
+    except Exception as e:
+        print(f"Failed to open settings window: {e}")
+        webbrowser.open("http://127.0.0.1:8000/")
 
 
-def start_tray_icon():
-    initial_icon = create_eye_icon(settings.break_interval)
+def start_tray():
     icon = pystray.Icon(
-        "eye_break",
-        icon=initial_icon,
-        title="Eye Break Reminder",
+        "blinkly",
+        icon=create_eye_icon(settings.break_interval),
+        title="Blinkly",
         menu=pystray.Menu(
             pystray.MenuItem("Open Settings", on_open_settings),
             pystray.MenuItem("Exit", on_exit),
         ),
     )
-
     threading.Thread(target=run_overlay_loop, args=(icon,), daemon=True).start()
-    # threading.Thread(target=start_web_ui, daemon=True).start()
-    # start_web_ui()
     icon.run()
 
-
 if __name__ == "__main__":
-    autostart.ensure_autostart(app_name="Blinkly")
-    # open_settings_page_when_ready()
-    threading.Thread(target=start_tray_icon, daemon=True).start()
-
-    # start_tray_icon()
+    autostart.ensure_autostart(app_name=APP_NAME)
+    start_backend()
+    start_tray()

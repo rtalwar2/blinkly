@@ -4,3 +4,4 @@ playsound==1.2.2
 fastapi[standard]
 pywin32
 appdirs
+pywebview
