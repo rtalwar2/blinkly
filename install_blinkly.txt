@@ -1,4 +1,38 @@
-pyinstaller --noconfirm --onefile --windowed --add-data "static;static" --add-data "assets;assets"  eye_saver.py
+Building a standalone Blinkly binary with PyInstaller
+=====================================================
 
+For everyday use on Linux you do NOT need this — just use ./install.sh and
+./run.sh. These notes are for producing a single-file distributable.
 
-pyinstaller --noconfirm --onefile --windowed --add-data "static:static" --add-data "helpers:helpers" --add-data "assets:assets"  blinkly.py
+Note the platform difference in the --add-data separator:
+  * Linux / macOS use a colon ":"      (static:static)
+  * Windows uses a semicolon ";"       (static;static)
+
+Linux / macOS
+-------------
+  pyinstaller --noconfirm --onefile --windowed \
+      --add-data "static:static" \
+      --add-data "helpers:helpers" \
+      --add-data "assets:assets" \
+      blinkly.py
+
+Windows
+-------
+  pyinstaller --noconfirm --onefile --windowed ^
+      --add-data "static;static" ^
+      --add-data "helpers;helpers" ^
+      --add-data "assets;assets" ^
+      blinkly.py
+
+Or just use the provided spec file:
+  pyinstaller --noconfirm blinkly.spec
+
+Caveats on Linux
+----------------
+* tkinter (python3-tk) and the AppIndicator/PyGObject bindings are system
+  libraries; PyInstaller does not bundle them reliably. The target machine
+  should still have python3-tk, python3-gi and gir1.2-ayatanaappindicator3-0.1
+  installed (see README.md).
+* Optional runtime tools (ffplay, notify-send, xprop, xprintidle) are detected
+  at runtime and are not bundled; install them on the target for the matching
+  features.

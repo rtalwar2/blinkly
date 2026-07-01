@@ -2,51 +2,143 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Blinkly Settings</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="settings.css">
-    <link rel="icon" type="image/x-icon" href="icon.svg">
-   <script defer src="./index.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-
+  <link rel="icon" type="image/x-icon" href="icon.svg">
+  <script defer src="./index.js"></script>
 </head>
 <body>
   <div class="card shadow-sm">
-    <div class="card-header">
-      Blinkly Settings
-    </div>
+    <div class="card-header">Blinkly Settings</div>
     <div class="card-body">
       <form id="settings-form">
-        <div class="mb-3">
-          <label class="form-label">Break interval (minutes):</label>
-          <input name="interval" id="interval" type="number" min="1" max="180" class="form-control" required>
-        </div>
 
-        <div class="mb-3">
-          <label class="form-label">Break duration (seconds):</label>
-          <input name="duration" id="duration" type="number" min="5" max="600" class="form-control" required>
-        </div>
-<!-- 
-        <div class="mb-3">
-          <label class="form-label">Overlay color:</label>
-          <input name="overlay_color" id="overlay_color" type="color" class="form-control form-control-color">
-        </div> -->
+        <!-- Schedule -->
+        <fieldset class="section">
+          <legend>Schedule</legend>
 
-        <!-- <div class="form-check mb-3">
-          <input type="checkbox" name="sound_enabled" id="sound_enabled" class="form-check-input">
-          <label class="form-check-label" for="sound_enabled">Play sound on break</label>
-        </div> -->
+          <div class="mb-3">
+            <label class="form-label" for="preset">Preset</label>
+            <select id="preset" name="preset" class="form-select">
+              <option value="custom">Custom</option>
+              <option value="20-20-20">20-20-20 (every 20 min, 20 s)</option>
+              <option value="eyecare-45">Eye care (every 45 min, 30 s)</option>
+              <option value="pomodoro">Pomodoro-ish (every 25 min, 60 s)</option>
+            </select>
+          </div>
+
+          <div class="row g-3">
+            <div class="col">
+              <label class="form-label" for="interval">Break interval (minutes)</label>
+              <input id="interval" name="break_interval" type="number" min="1" max="180" class="form-control" required>
+            </div>
+            <div class="col">
+              <label class="form-label" for="duration">Break duration (seconds)</label>
+              <input id="duration" name="break_duration" type="number" min="5" max="600" class="form-control" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Notifications & sound -->
+        <fieldset class="section">
+          <legend>Alerts</legend>
+
+          <div class="mb-3">
+            <label class="form-label" for="notify_before">Warn before a break (seconds, 0 = off)</label>
+            <input id="notify_before" name="notify_before" type="number" min="0" max="120" class="form-control">
+            <div class="form-text cap-note" data-cap="notifications"></div>
+          </div>
+
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="sound_enabled" name="sound_enabled">
+            <label class="form-check-label" for="sound_enabled">Play a sound when a break starts</label>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="volume">Volume: <span id="volume_val"></span>%</label>
+            <input id="volume" name="volume" type="range" min="0" max="100" class="form-range">
+            <div class="form-text cap-note" data-cap="sound"></div>
+          </div>
+        </fieldset>
+
+        <!-- Behaviour -->
+        <fieldset class="section">
+          <legend>Behaviour</legend>
+
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="strict_mode" name="strict_mode">
+            <label class="form-check-label" for="strict_mode">Strict mode (breaks can't be skipped)</label>
+          </div>
+
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="skip_on_fullscreen" name="skip_on_fullscreen">
+            <label class="form-check-label" for="skip_on_fullscreen">Skip breaks during fullscreen apps</label>
+            <div class="form-text cap-note" data-cap="fullscreen"></div>
+          </div>
+
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="idle_reset" name="idle_reset">
+            <label class="form-check-label" for="idle_reset">Don't interrupt me when I'm already away</label>
+            <div class="form-text cap-note" data-cap="idle"></div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="idle_threshold">Consider me "away" after (seconds)</label>
+            <input id="idle_threshold" name="idle_threshold" type="number" min="30" max="1800" class="form-control">
+          </div>
+        </fieldset>
+
+        <!-- Micro-breaks -->
+        <fieldset class="section">
+          <legend>Micro-breaks</legend>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="micro_breaks_enabled" name="micro_breaks_enabled">
+            <label class="form-check-label" for="micro_breaks_enabled">Gentle blink reminders between breaks</label>
+          </div>
+          <div class="row g-3">
+            <div class="col">
+              <label class="form-label" for="micro_break_interval">Every (minutes)</label>
+              <input id="micro_break_interval" name="micro_break_interval" type="number" min="1" max="60" class="form-control">
+            </div>
+            <div class="col">
+              <label class="form-label" for="micro_break_duration">Suggested length (seconds)</label>
+              <input id="micro_break_duration" name="micro_break_duration" type="number" min="5" max="120" class="form-control">
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Startup -->
+        <fieldset class="section">
+          <legend>Startup</legend>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="autostart_enabled" name="autostart_enabled">
+            <label class="form-check-label" for="autostart_enabled">Start Blinkly automatically on login</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="start_minimized" name="start_minimized">
+            <label class="form-check-label" for="start_minimized">Start minimized (don't open this page on launch)</label>
+          </div>
+        </fieldset>
 
         <div class="form-check form-switch mb-3">
-          <input class="form-check-input" type="checkbox" name="pause_blinkly" id="pause_blinkly">
+          <input class="form-check-input" type="checkbox" id="pause_blinkly" name="pause_blinkly">
           <label class="form-check-label" for="pause_blinkly">Pause Blinkly</label>
         </div>
 
         <button type="submit" class="btn btn-primary w-100">💾 Save Settings</button>
         <div class="msg" id="msg">Saved successfully!</div>
       </form>
+
+      <!-- Stats -->
+      <div class="stats" id="stats">
+        <div class="stats-title">Your eye-care today</div>
+        <div class="stats-row">
+          <div class="stat"><span class="stat-num" id="today_taken">0</span><span class="stat-label">breaks taken</span></div>
+          <div class="stat"><span class="stat-num" id="today_skipped">0</span><span class="stat-label">skipped</span></div>
+          <div class="stat"><span class="stat-num" id="week_taken">0</span><span class="stat-label">taken this week</span></div>
+        </div>
+      </div>
     </div>
   </div>
-
- </body>
+</body>
 </html>
