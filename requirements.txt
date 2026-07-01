@@ -1,6 +1,25 @@
+# Blinkly runtime dependencies
+#
+# Cross-platform core (installable with pip on Linux, macOS and Windows):
 screeninfo
 pystray
-playsound==1.2.2
+pillow
 fastapi[standard]
-pywin32
 appdirs
+
+# Windows-only integration (Start Menu shortcut + tray helpers).
+# The environment marker makes pip skip this automatically on Linux/macOS,
+# so `pip install -r requirements.txt` no longer fails on those platforms.
+pywin32; sys_platform == "win32"
+
+# NOTE (Linux): a few features rely on *system* packages that cannot be
+# installed with pip. Install them via ./install.sh or manually:
+#   sudo apt install python3-tk python3-gi gir1.2-ayatanaappindicator3-0.1 \
+#                    libnotify-bin
+#   # optional extras: ffmpeg (sound), xprintidle + x11-utils (idle/fullscreen)
+# and create the virtualenv with --system-site-packages so pystray can reach
+# the system AppIndicator bindings.
+#
+# Sound is played through system players (ffplay/paplay/canberra/mpg123);
+# the old `playsound` dependency is no longer required.
+# playsound==1.2.2

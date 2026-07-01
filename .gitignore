@@ -2,3 +2,7 @@ build/
 dist/
 .vscode
 *.pyc
+__pycache__/
+.venv/
+venv/
+blinkly_error.log
